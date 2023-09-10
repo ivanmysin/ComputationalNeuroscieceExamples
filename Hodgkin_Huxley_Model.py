@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 exp = np.exp
 
 def alpha_m(V):
-    alpha = -0.1*(V + 35) / (exp(-0.1*(V + 35)) - 1)
+    alpha = 5.0 * -0.1*(V + 35) / (exp(-0.1*(V + 35)) - 1)
     return alpha
 
 def beta_m(V):
-    beta = 4 * exp(-(V + 60)/18)
+    beta = 5.0 * 4 * exp(-(V + 60)/18)
     return beta
 
 
@@ -48,7 +48,7 @@ h = alpha_h(V) / (alpha_h(V) + beta_h(V))
 n = alpha_n(V) / (alpha_n(V) + beta_n(V))
 
 
-delta_t = 0.01
+delta_t = 0.05
 
 duration = 200
 N = int(duration / delta_t)
@@ -61,7 +61,7 @@ for i in range(N):
     # z_n = z_n-1 + delta t * f(z, t)
     INa = gNa * m**3 * h * (ENa - V)
     IK = gK * n**4 * (EK - V)
-    V = V + delta_t * ( gL * (EL - V) + INa + IK + Iapp)
+    V = V + delta_t * ( gL * (EL - V) + INa + IK + Iapp) / Cm
 
 
     m_tau = 1.0 / (alpha_m(V) + beta_m(V))
@@ -72,9 +72,13 @@ for i in range(N):
     h_inf = alpha_h(V) * h_tau
     n_inf = alpha_n(V) * n_tau
 
-    m = m_inf # m + delta_t * ( (m_inf - m) / m_tau )
-    h = h + delta_t * ( (h_inf - h) / h_tau )
-    n = n + delta_t * ( (n_inf - n) / n_tau )
+    #m = m_inf # m + delta_t * ( (m_inf - m) / m_tau )
+    m = m_inf - (m_inf - m) * exp( -delta_t / m_tau)
+
+    # h = h + delta_t * ( (h_inf - h) / h_tau )
+    # n = n + delta_t * ( (n_inf - n) / n_tau )
+    h = h_inf - (h_inf - h) * exp( -delta_t / h_tau)
+    n = n_inf - (n_inf - n) * exp( -delta_t / n_tau)
 
 
     Vhist.append(V)
